@@ -125,6 +125,7 @@ public class VideoInfo {
 		this.bitRate = bitRate;
 	}
 
+        @Override
 	public String toString() {
 		return getClass().getName() + " (decoder=" + decoder + ", size=" + size
 				+ ", bitRate=" + bitRate + ", frameRate=" + frameRate + ")";

@@ -171,6 +171,7 @@ public class EncodingAttributes implements Serializable {
 		this.videoAttributes = videoAttributes;
 	}
 
+        @Override
 	public String toString() {
 		return getClass().getName() + "(format=" + format + ", offset="
 				+ offset + ", duration=" + duration + ", audioAttributes="

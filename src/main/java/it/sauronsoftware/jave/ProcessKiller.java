@@ -29,7 +29,7 @@ class ProcessKiller extends Thread {
 	/**
 	 * The process to kill.
 	 */
-	private Process process;
+	private final Process process;
 
 	/**
 	 * Builds the killer.
@@ -37,14 +37,17 @@ class ProcessKiller extends Thread {
 	 * @param process
 	 *            The process to kill.
 	 */
-	public ProcessKiller(Process process) {
+	public ProcessKiller(Process process) 
+        {
 		this.process = process;
 	}
 
 	/**
 	 * It kills the supplied process.
 	 */
-	public void run() {
+        @Override
+	public void run() 
+        {
 		process.destroy();
 	}
 

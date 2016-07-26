@@ -36,7 +36,7 @@ class RBufferedReader extends BufferedReader {
 	/**
 	 * Re-inserted lines buffer.
 	 */
-	private ArrayList lines = new ArrayList();
+	private final ArrayList<String> lines = new ArrayList<String>();
 
 	/**
 	 * It builds the reader.
@@ -44,17 +44,23 @@ class RBufferedReader extends BufferedReader {
 	 * @param in
 	 *            The underlying reader.
 	 */
-	public RBufferedReader(Reader in) {
+	public RBufferedReader(Reader in) 
+        {
 		super(in);
 	}
 
 	/**
 	 * It returns the next line in the stream.
 	 */
-	public String readLine() throws IOException {
-		if (lines.size() > 0) {
-			return (String) lines.remove(0);
-		} else {
+        @Override
+	public String readLine() throws IOException 
+        {
+		if (lines.size() > 0) 
+                {
+			return lines.remove(0);
+		}
+                else 
+                {
 			return super.readLine();
 		}
 	}

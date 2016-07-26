@@ -128,6 +128,7 @@ public class MultimediaInfo {
 		this.video = video;
 	}
 
+        @Override
 	public String toString() {
 		return getClass().getName() + " (format=" + format + ", duration="
 				+ duration + ", video=" + video + ", audio=" + audio + ")";

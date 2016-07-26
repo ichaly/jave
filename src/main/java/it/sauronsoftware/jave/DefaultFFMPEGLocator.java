@@ -32,17 +32,16 @@ import java.io.OutputStream;
  * @author Carlo Pelliccia
  */
 public class DefaultFFMPEGLocator extends FFMPEGLocator {
-
     /**
      * Trace the version of the bundled ffmpeg executable. It's a counter: every
      * time the bundled ffmpeg change it is incremented by 1.
      */
-    private static final int myEXEversion = 1;
+    private static final int myEXEversion = 2;
 
     /**
      * The ffmpeg executable file path.
      */
-    private String path;
+    private final String path;
 
     /**
      * It builds the default FFMPEGLocator, exporting the ffmpeg executable on a
@@ -50,12 +49,12 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
      */
     public DefaultFFMPEGLocator() {
         // Windows?
-        boolean isWindows = false, isMac = false;
+        boolean isWindows;
         String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("windows") != -1) {
+        if (os.contains("windows")) {
             isWindows = true;
-        } else if (os.indexOf("mac os") != -1) {
-            isMac = true;
+        } else {
+            isWindows = false;
         }
         // Temp dir?
         File temp = new File(System.getProperty("java.io.tmpdir"), "jave-" + myEXEversion);
@@ -64,24 +63,17 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
             temp.deleteOnExit();
         }
         // ffmpeg executable export on disk.
-        String suffix = isWindows ? ".exe" : (isMac ? ".app" : "");
-        File exe = new File(temp, "ffmpeg" + suffix);
+        String suffix = isWindows ? ".exe" : "";
+        String arch = System.getProperty("os.arch");
+        File exe = new File(temp, "ffmpeg-" + arch + suffix);
         if (!exe.exists()) {
-            copyFile("ffmpeg" + suffix, exe);
-        }
-        // pthreadGC2.dll
-        if (isWindows) {
-            File dll = new File(temp, "pthreadGC2.dll");
-            if (!dll.exists()) {
-                copyFile("pthreadGC2.dll", dll);
-            }
+            copyFile("ffmpeg-" + arch + suffix, exe);
         }
         // Need a chmod?
         if (!isWindows) {
             Runtime runtime = Runtime.getRuntime();
             try {
-                runtime.exec(new String[]{"/bin/chmod", "755",
-                    exe.getAbsolutePath()});
+                runtime.exec(new String[]{"/bin/chmod", "755", exe.getAbsolutePath()});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -90,6 +82,7 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
         this.path = exe.getAbsolutePath();
     }
 
+    @Override
     protected String getFFMPEGExecutablePath() {
         return path;
     }
@@ -104,29 +97,32 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
         InputStream input = null;
         OutputStream output = null;
         try {
-            input = getClass().getResourceAsStream(path);
-            output = new FileOutputStream(dest);
-            byte[] buffer = new byte[1024];
-            int l;
-            while ((l = input.read(buffer)) != -1) {
-                output.write(buffer, 0, l);
+            input = getClass().getResourceAsStream("/native/" + path);
+            if (input != null) {
+                output = new FileOutputStream(dest);
+                byte[] buffer = new byte[1024];
+                int l;
+                while ((l = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, l);
+                }
+            } else {
+                throw new RuntimeException("Cannot retrieve native file " + path);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Cannot write file "
-                + dest.getAbsolutePath());
+            throw new RuntimeException("Cannot write file " + dest.getAbsolutePath());
         } finally {
             if (output != null) {
                 try {
                     output.close();
                 } catch (Throwable t) {
-                    ;
+                    ; // Silent ignore
                 }
             }
             if (input != null) {
                 try {
                     input.close();
                 } catch (Throwable t) {
-                    ;
+                    ; // Silent ignore
                 }
             }
         }
