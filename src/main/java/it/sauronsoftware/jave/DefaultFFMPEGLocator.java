@@ -36,7 +36,7 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
      * Trace the version of the bundled ffmpeg executable. It's a counter: every
      * time the bundled ffmpeg change it is incremented by 1.
      */
-    private static final int myEXEversion = 2;
+    private static final int myEXEversion = 3;
 
     /**
      * The ffmpeg executable file path.
@@ -49,12 +49,16 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
      */
     public DefaultFFMPEGLocator() {
         // Windows?
-        boolean isWindows;
+        boolean isWindows = false;
+        String suffix = "";
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("windows")) {
             isWindows = true;
+            suffix = ".exe";
+        } else if (os.contains("mac")) {
+            suffix = ".mac";
         } else {
-            isWindows = false;
+            suffix = ".linux";
         }
         // Temp dir?
         File temp = new File(System.getProperty("java.io.tmpdir"), "jave-" + myEXEversion);
@@ -63,11 +67,9 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
             temp.deleteOnExit();
         }
         // ffmpeg executable export on disk.
-        String suffix = isWindows ? ".exe" : "";
-        String arch = System.getProperty("os.arch");
-        File exe = new File(temp, "ffmpeg-" + arch + suffix);
+        File exe = new File(temp, "ffmpeg" + suffix);
         if (!exe.exists()) {
-            copyFile("ffmpeg-" + arch + suffix, exe);
+            copyFile("ffmpeg" + suffix, exe);
         }
         // Need a chmod?
         if (!isWindows) {
